@@ -1,10 +1,9 @@
 // Dependency
 const express = require('express');
 const bodyParser = require('body-parser');
-const moment = require('moment');
 const path = require('path');
 const expressStaticGzip = require("express-static-gzip");
-const db = require('../database/index.js');
+const db = require('./database/index.js');
 
 const app = express();
 const PORT = 3002;
