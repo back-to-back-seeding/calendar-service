@@ -11,9 +11,25 @@
 **Returns:** JSON
 
 ```json
+    [{
+      "nightly_fee": "Number",
+      "rating": "Number",
+      "reviews": "Number",
+      "minimum_stay": "Number",
+      "maximum_guest": "Number",
+      "id": "Number",
+      "booked_date": "String"
+    },
     {
+      "nightly_fee": "Number",
+      "rating": "Number",
+      "reviews": "Number",
+      "minimum_stay": "Number",
+      "maximum_guest": "Number",
+      "id": "Number",
+      "booked_date": "String"
+    }]
 
-    }
 ```
 
 ### Add reservation to a room
