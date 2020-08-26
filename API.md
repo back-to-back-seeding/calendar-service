@@ -68,7 +68,7 @@
     }
 ```
 
-### Delete restaurant
+### Delete reservation
   * DELETE `/rooms/:room_id/reservation/:reservation_id`
 
 **Path Parameters:**
