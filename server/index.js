@@ -28,7 +28,6 @@ app.get('/rooms/:room_id/reservation', (req, res) => {
   });
 });
 
-// POST request to '/rooms/:room_id/reservation' route
 app.post('/rooms/:room_id/reservation', (req, res) => {
   const checkIn = moment(req.body.check_in);
   const checkOut = moment(req.body.check_out);
@@ -36,9 +35,35 @@ app.post('/rooms/:room_id/reservation', (req, res) => {
     if (error) {
       res.status(404).send(error);
     } else {
+      res.status(201).send(results);
+    }
+  });
+});
+
+app.put('/rooms/:room_id/reservation/:reservation_id', (req, res) => {
+  const reservation = {
+    checkIn: moment(req.body.check_in),
+    checkOut: moment(req.body.check_out),
+    id: req.params.reservation_id,
+  };
+  models.Reservation.updateReservation(reservation, (error, results) => {
+    if (error) {
+      res.status(404).send(error);
+    } else {
       res.status(200).send(results);
     }
   });
+});
+
+app.delete('/rooms/:room_id/reservation/:reservation_id', (req, res) => {
+  models.Reservation.deleteReservation(req.params.reservation_id,
+    (error, results) => {
+      if (error) {
+        res.status(404).send(error);
+      } else {
+        res.status(200).send(results);
+      }
+    });
 });
 
 // Start server

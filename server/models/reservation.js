@@ -29,5 +29,27 @@ class Reservation {
       }
     });
   }
+
+  updateReservation(reservation, callback) {
+    const queryString = `UPDATE reservations SET check_in = ${reservation.checkIn}, check_out = ${reservation.checkOut} WHERE id = ${reservation.id} `;
+    db.connection.query(queryString, (error, results) => {
+      if (error) {
+        callback(error);
+      } else {
+        callback(null, results);
+      }
+    });
+  }
+
+  deleteReservation(reservationId, callback) {
+    const queryString = `DELETE FROM reservations WHERE id = ${reservationId} `;
+    db.connection.query(queryString, (error, results) => {
+      if (error) {
+        callback(error);
+      } else {
+        callback(null, results);
+      }
+    });
+  }
 }
 module.exports = new Reservation();
