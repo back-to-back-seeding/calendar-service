@@ -1,5 +1,4 @@
 const mysql = require('mysql');
-const mysqlConfig = require('./config.js');
 
 // For local host
 // module.exports.connection = mysql.createConnection({
@@ -13,6 +12,7 @@ const mysqlConfig = require('./config.js');
 module.exports.connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
+  password : '',
   database : 'calendar',
   port     : '3306'
 });

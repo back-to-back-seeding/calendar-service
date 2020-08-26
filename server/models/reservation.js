@@ -1,52 +1,33 @@
+/* eslint-disable class-methods-use-this */
+
 const db = require('../database');
 
 class Reservation {
-  getReservationForRoomId(id, callback) {
-      // declare query string
+  getReservationsByRoomId(roomId, callback) {
     const queryString = 'SELECT rooms.nightly_fee, rooms.rating, rooms.reviews, rooms.minimum_stay, rooms.maximum_guest, reservations.id, reservations.booked_date FROM rooms, reservations WHERE rooms.id = ? AND rooms.id = reservations.room_id ORDER BY reservations.booked_date;';
-    // declare query params
-    const queryParams = [req.params.room_id];
-    // get all the informations and reservations of a specify room with the room_id from the endpoint
-    db.connection.query(queryString, queryParams, function(error, results, fields){
+    const queryParams = [roomId];
+    db.connection.query(queryString, queryParams, (error, results) => {
       if (error) {
-        console.log("Failed to get data from databases: ", error);
         callback(error);
       } else {
-        console.log("Succeed to get data from databases");
         callback(null, results);
       }
     });
-
-    addReservation(id, callback) {
-      // get the check_in date from request
-      let check_in = moment(req.body.check_in);
-      // get the check_out date from request
-      let check_out = moment(req.body.check_out);
-      // create a list of dates in YYYY-MM-DD format that started from the check_in date to the check_out date
-      let dates = [];
-      for (let i = check_in; i <= check_out; check_in.add(1, 'days')) {
-        dates.push(check_in.format('YYYY-MM-DD'));
-      }
-      // iterate over the dates array
-      for (let i = 0; i < dates.length; i++) {
-        // declare query string
-        let queryString = 'INSERT INTO reservations (room_id, booked_date) VALUES (?, ?)';
-        // declare query params
-        let queryParams = [req.params.room_id, dates[i]];
-        // insert current date into reservations table where room_id is equal to the room_id from the endpoint
-        db.connection.query(queryString, queryParams, (error, results, fields) => {
-          if (error) {
-            console.log(`Failed to insert data to reservations table where room id = ${req.params.room_id}: `, error);
-            callback(error);
-          } else {
-            console.log(`Success to insert data to reservations table where room id = ${req.params.room_id}`);
-            callback(null, results)
-          }
-        });
-      }
-    }
   }
 
+  addReservation(checkIn, checkOut, roomId, callback) {
+    const dates = [];
+    for (let i = checkIn; i <= checkOut; checkIn.add(1, 'days')) {
+      dates.push([roomId, checkIn.format('YYYY-MM-DD')]);
+    }
+    const queryString = 'INSERT INTO reservations (room_id, booked_date) VALUES ?';
+    db.connection.query(queryString, [dates], (error, results) => {
+      if (error) {
+        callback(error);
+      } else {
+        callback(null, results);
+      }
+    });
+  }
 }
-
 module.exports = new Reservation();

@@ -1,22 +1,17 @@
+/* eslint-disable class-methods-use-this */
 const db = require('../database');
 
 class Room {
-  getAll(id, callback) {
-      // declare query string
-    const queryString = 'SELECT rooms.nightly_fee, rooms.rating, rooms.reviews, rooms.minimum_stay, rooms.maximum_guest, reservations.id, reservations.booked_date FROM rooms, reservations WHERE rooms.id = ? AND rooms.id = reservations.room_id ORDER BY reservations.booked_date;';
-    // declare query params
-    const queryParams = [req.params.room_id];
-    // get all the informations and reservations of a specify room with the room_id from the endpoint
-    db.connection.query(queryString, queryParams, function(error, results, fields){
+  getAll(callback) {
+    const queryString = 'SELECT * from rooms';
+    db.connection.query(queryString, (error, results) => {
       if (error) {
-        console.log("Failed to get data from databases: ", error);
-        res.status(404).send(error);
+        callback(error);
       } else {
-        console.log("Succeed to get data from databases");
-        res.status(200).send(results);
+        callback(null, results);
       }
     });
   }
 }
 
-module.exports = new Room();``
+module.exports = new Room();
