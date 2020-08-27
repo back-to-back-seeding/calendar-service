@@ -1,7 +1,7 @@
 ## Server API
 
 ### Get reservations for a room
-  * GET `/rooms/:room_id/reservation`
+  * GET `/rooms/:room_id/reservations`
 
 **Path Parameters:**
   * `room_id` room id
@@ -11,29 +11,21 @@
 **Returns:** JSON
 
 ```json
-    [{
-      "nightly_fee": "Number",
-      "rating": "Number",
-      "reviews": "Number",
-      "minimum_stay": "Number",
-      "maximum_guest": "Number",
-      "id": "Number",
-      "booked_date": "String"
-    },
     {
       "nightly_fee": "Number",
       "rating": "Number",
       "reviews": "Number",
       "minimum_stay": "Number",
       "maximum_guest": "Number",
-      "id": "Number",
-      "booked_date": "String"
-    }]
+      "book_dates" :
+        [{"id": "Number",
+        "booked_date": "String"}]
+    }
 
 ```
 
 ### Add reservation to a room
-  * POST `/rooms/:room_id/reservation`
+  * POST `/rooms/:room_id/reservations`
 
 **Path Parameters:**
 * `room_id` room id
@@ -51,7 +43,7 @@
 
 
 ### Update reservation
-  * PUT `/rooms/:room_id/reservation/:reservation_id`
+  * PUT `/rooms/:room_id/reservations/:reservation_id`
 
 **Path Parameters:**
   * `room_id` room id
@@ -69,7 +61,7 @@
 ```
 
 ### Delete reservation
-  * DELETE `/rooms/:room_id/reservation/:reservation_id`
+  * DELETE `/rooms/:room_id/reservations/:reservation_id`
 
 **Path Parameters:**
   * `room_id` room id
