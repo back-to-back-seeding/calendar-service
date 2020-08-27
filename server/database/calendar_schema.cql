@@ -22,8 +22,8 @@ CREATE TABLE reservations_by_room (
   reservation_id int PRIMARY KEY,
   check_in timestamp,
   check_out timestamp,
-  price int,
-  room_id int
+  room_id int,
+  PRIMARY KEY (reservation_id, room_id)
 );
 
 CREATE TABLE prices_by_date (

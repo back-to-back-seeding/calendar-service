@@ -12,14 +12,16 @@
 
 ```json
     {
-      "nightly_fee": "Number",
       "rating": "Number",
       "reviews": "Number",
       "minimum_stay": "Number",
       "maximum_guest": "Number",
       "book_dates" :
         [{"id": "Number",
-        "booked_date": "String"}]
+        "booked_date": "String"}],
+      "fees" :
+        [{"date" : "String",
+          "price" : "Number"}]
     }
 
 ```
