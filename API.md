@@ -18,6 +18,7 @@
       "maximum_guest": "Number",
       "book_dates" :
         [{"id": "Number",
+        "guests": "Number",
         "booked_date": "String"}],
       "fees" :
         [{"date" : "String",

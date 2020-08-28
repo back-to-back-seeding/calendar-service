@@ -1,9 +1,9 @@
 CREATE KEYSPACE calendar
-WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3};
+WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
 
 
 CREATE TABLE rooms (
-  room_id int PRIMARY KEY,
+  id int PRIMARY KEY,
   minimum_stay int,
   maximum_guest int,
   reviews int,
@@ -11,22 +11,24 @@ CREATE TABLE rooms (
 );
 
 CREATE TABLE prices (
-  pricing_id int PRIMARY KEY,
+  id int PRIMARY KEY,
   from_date timestamp,
   to_date timestamp,
   price int,
   room_id int
 );
 
-CREATE TABLE reservations_by_room (
-  reservation_id int PRIMARY KEY,
+CREATE TABLE reservations_by_room_user (
+  id int,
   check_in timestamp,
   check_out timestamp,
   room_id int,
-  PRIMARY KEY (reservation_id, room_id)
+  user_id int,
+  PRIMARY KEY (id, room_id, user_id)
 );
 
-CREATE TABLE prices_by_date (
+
+CREATE TABLE prices_by_room_date (
   room_id int,
   date timestamp,
   price int,
