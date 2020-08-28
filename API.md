@@ -40,7 +40,8 @@
 ```json
     {
       "check_in": "String",
-      "check_out": "String"
+      "check_out": "String",
+      "guests": "Number",
     }
 ```
 
@@ -59,7 +60,8 @@
 ```json
     {
       "check_in": "String",
-      "check_out": "String"
+      "check_out": "String",
+      "guests": "Number",
     }
 ```
 
