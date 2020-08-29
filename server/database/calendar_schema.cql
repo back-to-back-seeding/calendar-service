@@ -18,21 +18,20 @@ CREATE TABLE prices (
   room_id int
 );
 
-CREATE TABLE reservations_by_room_user (
+CREATE TABLE reservations_by_room (
   id int,
   check_in timestamp,
   check_out timestamp,
   room_id int,
   user_id int,
-  PRIMARY KEY (id, room_id, user_id)
+  PRIMARY KEY ((room_id,id))
 );
-
 
 CREATE TABLE prices_by_room_date (
   room_id int,
   date timestamp,
   price int,
-  PRIMARY KEY (room_id, date)
+  PRIMARY KEY ((room_id, date))
 );
 
 CREATE TABLE users (
