@@ -108,7 +108,8 @@ function writeNReservations(n, writer, encoding, callback) {
       id += 1;
       const roomId = i;
       const userId = id % MAX_DATA;
-      const data = `${id},${datesArray[index].checkIn},${datesArray[index].checkOut},${roomId},${userId}\n`;
+      const guests = (i % 16) + 1;
+      const data = `${id},${datesArray[index].checkIn},${datesArray[index].checkOut},${guests},${roomId},${userId}\n`;
       if (i === 1 && index === datesArray.length - 1) {
         writer.write(data, encoding, callback);
       } else {
