@@ -82,9 +82,9 @@ function generateDates() {
   let days = 0;
   while (days <= 90) {
     days += getRandomFromInterval(1, 3);
-    const checkIn = new Date(date.add(days, 'days').format('YYYY-MM-DD'));
+    const checkIn = date.add(days, 'days').format('YYYY-MM-DD');
     const inc = getRandomFromInterval(1, 4);
-    const checkOut = new Date(date.add(inc, 'days').format('YYYY-MM-DD'));
+    const checkOut = date.add(inc, 'days').format('YYYY-MM-DD');
     days += inc;
     dates.push({ checkIn, checkOut });
   }
@@ -106,16 +106,56 @@ function writeNReservations(n, writer, encoding, callback) {
         index += 1;
       }
       id += 1;
-      const room_id = i - 1;
-      const user_id = i % MAX_DATA;
-      const data = `${id},${datesArray[index].checkIn},${datesArray[index].checkOut},${room_id},${user_id}\n`;
-      if (i === 0) {
+      const roomId = i;
+      const userId = id % MAX_DATA;
+      const data = `${id},${datesArray[index].checkIn},${datesArray[index].checkOut},${roomId},${userId}\n`;
+      if (i === 1 && index === datesArray.length - 1) {
         writer.write(data, encoding, callback);
       } else {
         ok = writer.write(data, encoding);
       }
-    } while (i > 0 && ok);
-    if (i > 0) {
+    } while ((i > 1 || (i === 1 && index < datesArray.length - 1)) && ok);
+    if ((i > 1 || (i === 1 && index < datesArray.length - 1))) {
+      writer.once('drain', write);
+    }
+  }
+  write();
+}
+
+function generatePrices() {
+  const prices = [];
+  for (let i = 0; i < 100; i += 1) {
+    prices.push(getRandomFromInterval(200, 900));
+  }
+  return prices;
+}
+
+function writeNPrices(n, writer, encoding, callback) {
+  let i = n;
+  let id = 0;
+  const dates = generateDates();
+  const prices = generatePrices();
+  let index = 0;
+  function write() {
+    let ok = true;
+    do {
+      if (index === dates.length - 1) {
+        index = 0;
+        i -= 1;
+      } else {
+        index += 1;
+      }
+      id += 1;
+      const roomId = i;
+      const price = prices[id % prices.length];
+      const data = `${id},${dates[index].checkIn},${dates[index].checkOut},${price},${roomId}\n`;
+      if (i === 1 && index === dates.length - 1) {
+        writer.write(data, encoding, callback);
+      } else {
+        ok = writer.write(data, encoding);
+      }
+    } while ((i > 1 || (i === 1 && index < dates.length - 1)) && ok);
+    if ((i > 1 || (i === 1 && index < dates.length - 1))) {
       writer.once('drain', write);
     }
   }
@@ -138,4 +178,10 @@ const writeReservations = fs.createWriteStream('reservations.csv');
 writeReservations.write('id,check_in,check_out,room_id,user_id\n', 'utf8');
 writeNReservations(MAX_DATA, writeReservations, 'utf-8', () => {
   writeReservations.end();
+});
+
+const writePrices = fs.createWriteStream('prices.csv');
+writePrices.write('id,from_date,to_date,price,room_id\n', 'utf8');
+writeNPrices(MAX_DATA, writePrices, 'utf-8', () => {
+  writePrices.end();
 });
