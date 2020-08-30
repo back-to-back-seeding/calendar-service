@@ -1,8 +1,9 @@
 const fs = require('fs');
+const moment = require('moment');
 
 const MAX_DATA = 10;
 
-function genRand(min, max, decimalPlaces) {
+function genRandDecimal(min, max, decimalPlaces) {
   // eslint-disable-next-line max-len
   const rand = Math.random() < 0.5 ? ((1 - Math.random()) * (max - min) + min) : (Math.random() * (max - min) + min);
   const power = 10 ** decimalPlaces;
@@ -12,9 +13,13 @@ function genRand(min, max, decimalPlaces) {
 function generateRatings() {
   const a = [];
   for (let i = 0; i < 100; i += 1) {
-    a.push(genRand(3, 5, 2));
+    a.push(genRandDecimal(3, 5, 2));
   }
   return a;
+}
+
+function getRandomFromInterval(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 function writeNRooms(n, writer, encoding, callback) {
@@ -71,14 +76,66 @@ function writeNUsers(n, writer, encoding, callback) {
   write();
 }
 
-const writeRooms = fs.createWriteStream('rooms.csv');
-writeRooms.write('id,minimum_stay,maximum_guest,reviews,rating\n', 'utf8');
-writeNRooms(MAX_DATA, writeRooms, 'utf-8', () => {
-  writeRooms.end();
-});
+function generateDates() {
+  const dates = [];
+  const date = moment();
+  let days = 0;
+  while (days <= 90) {
+    days += getRandomFromInterval(1, 3);
+    const checkIn = new Date(date.add(days, 'days').format('YYYY-MM-DD'));
+    const inc = getRandomFromInterval(1, 4);
+    const checkOut = new Date(date.add(inc, 'days').format('YYYY-MM-DD'));
+    days += inc;
+    dates.push({ checkIn, checkOut });
+  }
+  return dates;
+}
 
-const writeUsers = fs.createWriteStream('users.csv');
-writeUsers.write('id,first_name,last_name,email,password\n', 'utf8');
-writeNUsers(MAX_DATA, writeUsers, 'utf-8', () => {
-  writeUsers.end();
+function writeNReservations(n, writer, encoding, callback) {
+  let i = n;
+  let id = 0;
+  const datesArray = generateDates();
+  let index = 0;
+  function write() {
+    let ok = true;
+    do {
+      if (index === datesArray.length - 1) {
+        index = 0;
+        i -= 1;
+      } else {
+        index += 1;
+      }
+      id += 1;
+      const room_id = i - 1;
+      const user_id = i % MAX_DATA;
+      const data = `${id},${datesArray[index].checkIn},${datesArray[index].checkOut},${room_id},${user_id}\n`;
+      if (i === 0) {
+        writer.write(data, encoding, callback);
+      } else {
+        ok = writer.write(data, encoding);
+      }
+    } while (i > 0 && ok);
+    if (i > 0) {
+      writer.once('drain', write);
+    }
+  }
+  write();
+}
+
+// const writeRooms = fs.createWriteStream('rooms.csv');
+// writeRooms.write('id,minimum_stay,maximum_guest,reviews,rating\n', 'utf8');
+// writeNRooms(MAX_DATA, writeRooms, 'utf-8', () => {
+//   writeRooms.end();
+// });
+
+// const writeUsers = fs.createWriteStream('users.csv');
+// writeUsers.write('id,first_name,last_name,email,password\n', 'utf8');
+// writeNUsers(MAX_DATA, writeUsers, 'utf-8', () => {
+//   writeUsers.end();
+// });
+
+const writeReservations = fs.createWriteStream('reservations.csv');
+writeReservations.write('id,check_in,check_out,room_id,user_id\n', 'utf8');
+writeNReservations(MAX_DATA, writeReservations, 'utf-8', () => {
+  writeReservations.end();
 });
