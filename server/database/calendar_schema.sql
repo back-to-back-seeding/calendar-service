@@ -17,6 +17,7 @@ CREATE TABLE reservations (
     id int  NOT NULL,
     check_in date  NOT NULL,
     check_out date  NOT NULL,
+    guests int NOT NULL,
     room_id int  NOT NULL,
     user_id int  NOT NULL
     -- CONSTRAINT reservations_pk PRIMARY KEY (id)
@@ -35,10 +36,10 @@ CREATE TABLE rooms (
 -- Table: users
 CREATE TABLE users (
     id int  NOT NULL,
-    first_name varchar(80)  NOT NULL,
-    last_name varchar(80)  NOT NULL,
-    email varchar(20)  NOT NULL,
-    password varchar(20)  NOT NULL
+    first_name varchar(100)  NOT NULL,
+    last_name varchar(100)  NOT NULL,
+    email varchar(100)  NOT NULL,
+    password varchar(100)  NOT NULL
     -- CONSTRAINT users_pk PRIMARY KEY (id)
 );
 

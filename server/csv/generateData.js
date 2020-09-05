@@ -1,7 +1,8 @@
 const fs = require('fs');
 const moment = require('moment');
 
-const MAX_DATA = 10;
+const MAX_ROOMS = 10000000;
+const MAX_USERS = 100000;
 
 function genRandDecimal(min, max, decimalPlaces) {
   // eslint-disable-next-line max-len
@@ -107,7 +108,7 @@ function writeNReservations(n, writer, encoding, callback) {
       }
       id += 1;
       const roomId = i;
-      const userId = id % MAX_DATA;
+      const userId = id % MAX_USERS;
       const guests = (i % 16) + 1;
       const data = `${id},${datesArray[index].checkIn},${datesArray[index].checkOut},${guests},${roomId},${userId}\n`;
       if (i === 1 && index === datesArray.length - 1) {
@@ -163,26 +164,73 @@ function writeNPrices(n, writer, encoding, callback) {
   write();
 }
 
+function generateAllDates() {
+  const dates = [];
+  const date = moment();
+  let i = 1;
+  while (i <= 90) {
+    dates.push(date.add(1, 'days').format('YYYY-MM-DD'));
+    i += 1;
+  }
+  return dates;
+}
+
+function writeNPricesPerDay(n, writer, encoding, callback) {
+  let i = n;
+  const dates = generateAllDates();
+  const prices = generatePrices();
+  let index = 0;
+  function write() {
+    let ok = true;
+    do {
+      if (index === dates.length - 1) {
+        index = 0;
+        i -= 1;
+      } else {
+        index += 1;
+      }
+      const roomId = i;
+      const price = prices[i % prices.length];
+      const data = `${roomId},${dates[index]},${price}\n`;
+      if (i === 1 && index === dates.length - 1) {
+        writer.write(data, encoding, callback);
+      } else {
+        ok = writer.write(data, encoding);
+      }
+    } while ((i > 1 || (i === 1 && index < dates.length - 1)) && ok);
+    if ((i > 1 || (i === 1 && index < dates.length - 1))) {
+      writer.once('drain', write);
+    }
+  }
+  write();
+}
+
 // const writeRooms = fs.createWriteStream('rooms.csv');
 // writeRooms.write('id,minimum_stay,maximum_guest,reviews,rating\n', 'utf8');
-// writeNRooms(MAX_DATA, writeRooms, 'utf-8', () => {
+// writeNRooms(MAX_ROOMS, writeRooms, 'utf-8', () => {
 //   writeRooms.end();
 // });
 
 // const writeUsers = fs.createWriteStream('users.csv');
 // writeUsers.write('id,first_name,last_name,email,password\n', 'utf8');
-// writeNUsers(MAX_DATA, writeUsers, 'utf-8', () => {
+// writeNUsers(MAX_USERS, writeUsers, 'utf-8', () => {
 //   writeUsers.end();
 // });
 
-const writeReservations = fs.createWriteStream('reservations.csv');
-writeReservations.write('id,check_in,check_out,room_id,user_id\n', 'utf8');
-writeNReservations(MAX_DATA, writeReservations, 'utf-8', () => {
+const writeReservations = fs.createWriteStream('reservations_cassandra.csv');
+writeReservations.write('id,check_in,check_out,guests,room_id,user_id\n', 'utf8');
+writeNReservations(MAX_ROOMS, writeReservations, 'utf-8', () => {
   writeReservations.end();
 });
 
-const writePrices = fs.createWriteStream('prices.csv');
-writePrices.write('id,from_date,to_date,price,room_id\n', 'utf8');
-writeNPrices(MAX_DATA, writePrices, 'utf-8', () => {
-  writePrices.end();
-});
+// const writePrices = fs.createWriteStream('prices.csv');
+// writePrices.write('id,from_date,to_date,price,room_id\n', 'utf8');
+// writeNPrices(MAX_ROOMS, writePrices, 'utf-8', () => {
+//   writePrices.end();
+// });
+
+// const writePricesDay = fs.createWriteStream('pricesDay.csv');
+// writePricesDay.write('room_id,date,price\n', 'utf8');
+// writeNPricesPerDay(MAX_ROOMS, writePricesDay, 'utf-8', () => {
+//   writePricesDay.end();
+// });
