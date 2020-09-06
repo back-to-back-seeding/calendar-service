@@ -4,11 +4,22 @@ const db = require('../database');
 class Room {
   getAll(callback) {
     const queryString = 'SELECT * from rooms';
-    db.connection.query(queryString, (error, results) => {
+    db.query(queryString, (error, results) => {
       if (error) {
         callback(error);
       } else {
         callback(null, results);
+      }
+    });
+  }
+
+  getRoomById(id, callback) {
+    const queryString = 'SELECT * from rooms where id=$1';
+    db.query(queryString, [id], (error, results) => {
+      if (error) {
+        callback(error);
+      } else {
+        callback(null, results.rows);
       }
     });
   }

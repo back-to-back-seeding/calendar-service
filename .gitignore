@@ -15,3 +15,7 @@ coverage/
 
 #csv files
 server/csv/*.csv
+
+#new Relic
+newrelic.js
+newrelic_agent.log

@@ -1,5 +1,6 @@
 // Dependency
 const express = require('express');
+const newRelic = require('newrelic');
 const bodyParser = require('body-parser');
 const moment = require('moment');
 const path = require('path');
@@ -13,10 +14,23 @@ const publicPath = path.join(__dirname, '/../public');
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/rooms/:room_id', expressStaticGzip(publicPath, {
-  enableBrotli: true,
-  orderPreference: ['br'],
-}));
+app.use('/rooms/:room_id', (req, res, next) => {
+  expressStaticGzip(publicPath, {
+    enableBrotli: true,
+    orderPreference: ['br'],
+  });
+  next();
+});
+
+app.get('/rooms/:room_id', (req, res) => {
+  models.Room.getRoomById(req.params.room_id, (error, results) => {
+    if (error) {
+      res.status(404).send(error);
+    } else {
+      res.status(200).send(results);
+    }
+  });
+});
 
 app.get('/rooms/:room_id/reservation', (req, res) => {
   models.Reservation.getReservationsByRoomId(req.params.room_id, (error, results) => {
