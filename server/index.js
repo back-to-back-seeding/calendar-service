@@ -43,13 +43,38 @@ app.post('/rooms', (req, res) => {
 });
 
 app.get('/rooms/:room_id/reservations', (req, res) => {
-  models.Reservation.getReservationsByRoomId(req.params.room_id, (error, results) => {
+  models.Room.getRoomById(req.params.room_id, (error, rooms) => {
     if (error) {
       res.status(404).send(error);
     } else {
-      res.status(200).send(results);
+      const roomInfo = rooms[0];
+      models.Reservation.getReservationsByRoomId(req.params.room_id, (resError, reservations) => {
+        if (resError) {
+          res.status(404).send(resError);
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          roomInfo.book_dates = reservations;
+          models.Price.getPriceByRoomId(req.params.room_id, (priceError, prices) => {
+            if (priceError) {
+              res.status(404).send(priceError);
+            } else {
+              // eslint-disable-next-line no-param-reassign
+              roomInfo.fees = prices;
+              res.status(200).send(roomInfo);
+            }
+          });
+        }
+      });
     }
   });
+
+  // models.Reservation.getReservationsByRoomId(req.params.room_id, (error, results) => {
+  //   if (error) {
+  //     res.status(404).send(error);
+  //   } else {
+  //     res.status(200).send(results);
+  //   }
+  // });
 });
 
 app.post('/rooms/:room_id/reservations', (req, res) => {
