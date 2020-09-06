@@ -32,7 +32,17 @@ app.get('/rooms/:room_id', (req, res) => {
   });
 });
 
-app.get('/rooms/:room_id/reservation', (req, res) => {
+app.post('/rooms', (req, res) => {
+  models.Room.addRoom(req.body, (error) => {
+    if (error) {
+      res.status(404).send(error);
+    } else {
+      res.status(200).end();
+    }
+  });
+});
+
+app.get('/rooms/:room_id/reservations', (req, res) => {
   models.Reservation.getReservationsByRoomId(req.params.room_id, (error, results) => {
     if (error) {
       res.status(404).send(error);
@@ -42,10 +52,15 @@ app.get('/rooms/:room_id/reservation', (req, res) => {
   });
 });
 
-app.post('/rooms/:room_id/reservation', (req, res) => {
-  const checkIn = moment(req.body.check_in);
-  const checkOut = moment(req.body.check_out);
-  models.Reservation.addReservation(checkIn, checkOut, req.params.room_id, (error, results) => {
+app.post('/rooms/:room_id/reservations', (req, res) => {
+  const reservation = [
+    moment(req.body.check_in),
+    moment(req.body.check_out),
+    req.body.guests,
+    req.params.room_id,
+    req.body.user_id,
+  ];
+  models.Reservation.addReservation(reservation, (error, results) => {
     if (error) {
       res.status(404).send(error);
     } else {
@@ -54,22 +69,23 @@ app.post('/rooms/:room_id/reservation', (req, res) => {
   });
 });
 
-app.put('/rooms/:room_id/reservation/:reservation_id', (req, res) => {
-  const reservation = {
-    checkIn: moment(req.body.check_in),
-    checkOut: moment(req.body.check_out),
-    id: req.params.reservation_id,
-  };
-  models.Reservation.updateReservation(reservation, (error, results) => {
-    if (error) {
-      res.status(404).send(error);
-    } else {
-      res.status(200).send(results);
-    }
-  });
-});
+//TODO
+// app.put('/rooms/:room_id/reservations/:reservation_id', (req, res) => {
+//   const reservation = {
+//     checkIn: moment(req.body.check_in),
+//     checkOut: moment(req.body.check_out),
+//     id: req.params.reservation_id,
+//   };
+//   models.Reservation.updateReservation(reservation, (error, results) => {
+//     if (error) {
+//       res.status(404).send(error);
+//     } else {
+//       res.status(200).send(results);
+//     }
+//   });
+// });
 
-app.delete('/rooms/:room_id/reservation/:reservation_id', (req, res) => {
+app.delete('/rooms/:room_id/reservations/:reservation_id', (req, res) => {
   models.Reservation.deleteReservation(req.params.reservation_id,
     (error, results) => {
       if (error) {
