@@ -1,5 +1,6 @@
 // Dependency
 const express = require('express');
+const newRelic = require('newrelic');
 const bodyParser = require('body-parser');
 const moment = require('moment');
 const path = require('path');
@@ -13,13 +14,16 @@ const publicPath = path.join(__dirname, '/../public');
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/rooms/:room_id', expressStaticGzip(publicPath, {
-  enableBrotli: true,
-  orderPreference: ['br'],
-}));
+app.use('/rooms/:room_id', (req, res, next) => {
+  expressStaticGzip(publicPath, {
+    enableBrotli: true,
+    orderPreference: ['br'],
+  });
+  next();
+});
 
-app.get('/rooms/:room_id/reservation', (req, res) => {
-  models.Reservation.getReservationsByRoomId(req.params.room_id, (error, results) => {
+app.get('/rooms/:room_id', (req, res) => {
+  models.Room.getRoomById(req.params.room_id, (error, results) => {
     if (error) {
       res.status(404).send(error);
     } else {
@@ -28,10 +32,60 @@ app.get('/rooms/:room_id/reservation', (req, res) => {
   });
 });
 
-app.post('/rooms/:room_id/reservation', (req, res) => {
-  const checkIn = moment(req.body.check_in);
-  const checkOut = moment(req.body.check_out);
-  models.Reservation.addReservation(checkIn, checkOut, req.params.room_id, (error, results) => {
+app.post('/rooms', (req, res) => {
+  models.Room.addRoom(req.body, (error) => {
+    if (error) {
+      res.status(404).send(error);
+    } else {
+      res.status(200).end();
+    }
+  });
+});
+
+app.get('/rooms/:room_id/reservations', (req, res) => {
+  models.Room.getRoomById(req.params.room_id, (error, rooms) => {
+    if (error) {
+      res.status(404).send(error);
+    } else {
+      const roomInfo = rooms[0];
+      models.Reservation.getReservationsByRoomId(req.params.room_id, (resError, reservations) => {
+        if (resError) {
+          res.status(404).send(resError);
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          roomInfo.book_dates = reservations;
+          models.Price.getPriceByRoomId(req.params.room_id, (priceError, prices) => {
+            if (priceError) {
+              res.status(404).send(priceError);
+            } else {
+              // eslint-disable-next-line no-param-reassign
+              roomInfo.fees = prices;
+              res.status(200).send(roomInfo);
+            }
+          });
+        }
+      });
+    }
+  });
+
+  // models.Reservation.getReservationsByRoomId(req.params.room_id, (error, results) => {
+  //   if (error) {
+  //     res.status(404).send(error);
+  //   } else {
+  //     res.status(200).send(results);
+  //   }
+  // });
+});
+
+app.post('/rooms/:room_id/reservations', (req, res) => {
+  const reservation = [
+    moment(req.body.check_in),
+    moment(req.body.check_out),
+    req.body.guests,
+    req.params.room_id,
+    req.body.user_id,
+  ];
+  models.Reservation.addReservation(reservation, (error, results) => {
     if (error) {
       res.status(404).send(error);
     } else {
@@ -40,22 +94,23 @@ app.post('/rooms/:room_id/reservation', (req, res) => {
   });
 });
 
-app.put('/rooms/:room_id/reservation/:reservation_id', (req, res) => {
-  const reservation = {
-    checkIn: moment(req.body.check_in),
-    checkOut: moment(req.body.check_out),
-    id: req.params.reservation_id,
-  };
-  models.Reservation.updateReservation(reservation, (error, results) => {
-    if (error) {
-      res.status(404).send(error);
-    } else {
-      res.status(200).send(results);
-    }
-  });
-});
+//TODO
+// app.put('/rooms/:room_id/reservations/:reservation_id', (req, res) => {
+//   const reservation = {
+//     checkIn: moment(req.body.check_in),
+//     checkOut: moment(req.body.check_out),
+//     id: req.params.reservation_id,
+//   };
+//   models.Reservation.updateReservation(reservation, (error, results) => {
+//     if (error) {
+//       res.status(404).send(error);
+//     } else {
+//       res.status(200).send(results);
+//     }
+//   });
+// });
 
-app.delete('/rooms/:room_id/reservation/:reservation_id', (req, res) => {
+app.delete('/rooms/:room_id/reservations/:reservation_id', (req, res) => {
   models.Reservation.deleteReservation(req.params.reservation_id,
     (error, results) => {
       if (error) {

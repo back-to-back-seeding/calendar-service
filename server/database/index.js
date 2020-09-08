@@ -1,18 +1,13 @@
-const mysql = require('mysql');
+const { Pool } = require('pg');
 
-// For local host
-// module.exports.connection = mysql.createConnection({
-//   host     : 'localhost',
-//   user     : mysqlConfig.mysqlUser,
-//   password : mysqlConfig.mysqlPW,
-//   database : 'calendar'
-// });
+const config = {
+  user: 'blancagomez',
+  database: 'calendar',
+  password: '',
+};
 
-// For docker network
-module.exports.connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : '',
-  database : 'calendar',
-  port     : '3306'
-});
+const pool = new Pool(config);
+
+module.exports = {
+  query: (text, params, callback) => pool.query(text, params, callback),
+};
