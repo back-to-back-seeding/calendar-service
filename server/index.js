@@ -21,6 +21,9 @@ app.use('/rooms/:room_id', (req, res, next) => {
   });
   next();
 });
+app.get('/loaderio-83dc117556c7f94eeadc7d6b4a6ab1ba', (req, res) => {
+	res.sendFile(path.join(__dirname, 'loaderio-83dc117556c7f94eeadc7d6b4a6ab1ba.txt'));
+});
 
 app.get('/rooms/:room_id', (req, res) => {
   models.Room.getRoomById(req.params.room_id, (error, results) => {
